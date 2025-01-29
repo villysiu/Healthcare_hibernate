@@ -30,36 +30,37 @@ public class Main {
 
 
         try (Scanner scanner = new Scanner(System.in)) {
-            int choice = 1;
-            while (choice != 4) {
+            String choice = "";
+            while (!choice.equals("4")) {
+                System.out.println("Enter your choice (1, 2, 3, or 4)");
                 System.out.println("1. Manage Patients");
                 System.out.println("2. Manage Doctors");
                 System.out.println("3. Manage Appointments");
                 System.out.println("4. End program");
 
-                choice = scanner.nextInt();
-                scanner.nextLine();
+                choice = scanner.nextLine();
 
                 switch (choice) {
-                    case 1:
+                    case "1":
                         managePatients(scanner, patientService);
                         break;
-                    case 2:
+                    case "2":
                         manageDoctors(scanner, doctorService);
                         break;
-                    case 3:
+                    case "3":
                         manageAppointments(scanner, appointmentService, patientService, doctorService);
                         break;
-                    case 4:
+                    case "4":
                         System.out.println("Bye");
                         break;
                     default:
-                        System.out.println("Invalid choice.");
+                        System.out.println("Invalid choice. Try again.");
                 }
 
             }
         } finally {
             sessionFactory.close();
+
         }
     }
 
