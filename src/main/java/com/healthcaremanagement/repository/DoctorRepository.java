@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DoctorRepository {
     private final SessionFactory sessionFactory;
@@ -26,7 +27,7 @@ public class DoctorRepository {
 
     public Doctor getDoctorById(int doctorId) {
         try (Session session = sessionFactory.openSession()) {
-            return session.get(Doctor.class, doctorId);
+            return  session.get(Doctor.class, doctorId);
         }
     }
 

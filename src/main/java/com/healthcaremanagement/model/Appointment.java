@@ -9,12 +9,19 @@ import lombok.Data;
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+
     private int appointmentId;
-    private int  patientId;
-    private int doctorId;
+
+    @ManyToOne
+    @JoinColumn(name="patient_id")
+    private Patient  patient;
+
+    @ManyToOne
+    @JoinColumn(name="doctor_id")
+    private Doctor doctor;
 
     //YYYY-MM-DD
-    @Column(name = "AppointmentDate")
     private String appointmentDate;
     private String notes;
 }

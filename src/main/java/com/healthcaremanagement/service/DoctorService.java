@@ -6,6 +6,7 @@ import com.healthcaremanagement.repository.DoctorRepository;
 import com.healthcaremanagement.repository.PatientRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DoctorService {
     private final DoctorRepository doctorRepository;
@@ -22,6 +23,7 @@ public class DoctorService {
     public Doctor getDoctorById(int id) {
         return doctorRepository.getDoctorById(id);
     }
+
 
     public List<Doctor> getAllDoctors() {
         return doctorRepository.getAllDoctors();

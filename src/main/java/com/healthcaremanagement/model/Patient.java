@@ -3,6 +3,9 @@ package com.healthcaremanagement.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table
 @Data
@@ -26,4 +29,7 @@ public class Patient {
 
     @Column(name = "PhoneNumber")
     private String phoneNumber;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Appointment> appointments = new HashSet<>();
 }
