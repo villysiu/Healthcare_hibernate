@@ -171,7 +171,7 @@ public class Main {
 
                     Doctor doctor = inputDoctor(scanner, doctorService);
 
-                    System.out.println("Doctor ID: " + doctor.getId());
+                    System.out.println("Doctor ID: " + doctor.getDoctorId());
                     System.out.println("Name: " + doctor.getFirstName() + " " + doctor.getLastName());
                     System.out.println("Email: " + doctor.getEmail());
                     System.out.println("Specialty: " + doctor.getSpecialty());
@@ -196,7 +196,7 @@ public class Main {
                     break;
                 case 4:
                     Doctor deleteDoctor = inputDoctor(scanner, doctorService);
-                    doctorService.deleteDoctor(deleteDoctor.getId());  // Use service here
+                    doctorService.deleteDoctor(deleteDoctor.getDoctorId());  // Use service here
                     System.out.println("Doctor deleted successfully.");
                     break;
                 default:
@@ -238,7 +238,7 @@ public class Main {
                 Appointment ap = inputAppointment(scanner, appointmentService);
 
                     System.out.println("Appointment ID: " + ap.getAppointmentId());
-                    System.out.println("Doctor ID: " + ap.getDoctor().getId());
+                    System.out.println("Doctor ID: " + ap.getDoctor().getDoctorId());
                     System.out.println("Patient ID: " + ap.getPatient().getPatientId());
 
                     System.out.println("Appointment Date: " + ap.getAppointmentDate());

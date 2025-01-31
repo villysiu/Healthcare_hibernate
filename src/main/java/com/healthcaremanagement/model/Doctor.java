@@ -13,7 +13,7 @@ import java.util.Set;
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int doctorId;
 
     @Column(name = "FirstName")
     private String firstName;
