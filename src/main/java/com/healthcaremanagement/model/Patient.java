@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,4 +33,7 @@ public class Patient {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Appointment> appointments = new HashSet<>();
+
+    @ManyToMany(mappedBy = "patients", cascade = {CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    private List<Doctor> doctors;
 }
