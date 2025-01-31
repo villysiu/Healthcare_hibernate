@@ -223,32 +223,42 @@ public class Main {
                 // Application calls the service layer, not the repository directly
                 Appointment newAppointment = new Appointment();
 
-                newAppointment.setPatient(inputPatient(scanner, patientService));
-                newAppointment.setDoctor(inputDoctor(scanner, doctorService));
+                Patient p1= inputPatient(scanner, patientService);
+                Doctor d1= inputDoctor(scanner, doctorService);
+                newAppointment.setPatient(p1);
+                newAppointment.setDoctor(d1);
                 newAppointment.setAppointmentDate(inputDate(scanner, "Enter date in YYYY-MM-DD: "));
 
                 System.out.print("Enter notes: ");
                 newAppointment.setNotes(scanner.nextLine());
 
                 appointmentService.createAppointment(newAppointment);
+
+                doctorService.addPatientToDoctor(d1.getDoctorId(), p1);
+                patientService.addDoctorToPatient(p1.getPatientId(), d1);
+
                 System.out.println("Appointment created successfully.");
                 break;
 
             case 2:
                 Appointment ap = inputAppointment(scanner, appointmentService);
 
-                    System.out.println("Appointment ID: " + ap.getAppointmentId());
-                    System.out.println("Doctor ID: " + ap.getDoctor().getDoctorId());
-                    System.out.println("Patient ID: " + ap.getPatient().getPatientId());
+                System.out.println("Appointment ID: " + ap.getAppointmentId());
+                System.out.println("Doctor ID: " + ap.getDoctor().getDoctorId());
+                System.out.println("Patient ID: " + ap.getPatient().getPatientId());
 
-                    System.out.println("Appointment Date: " + ap.getAppointmentDate());
-                    System.out.println("Notes: " + ap.getNotes());
+                System.out.println("Appointment Date: " + ap.getAppointmentDate());
+                System.out.println("Notes: " + ap.getNotes());
 
                 break;
 
             case 3:
 
-                Appointment a1 = inputAppointment(scanner, appointmentService);  // Use service here
+                Appointment a1 = inputAppointment(scanner, appointmentService);
+
+                Doctor originalDoctor = a1.getDoctor();
+                Patient originalPatient = a1.getPatient();
+
                 a1.setPatient(inputPatient(scanner, patientService));
                 a1.setDoctor(inputDoctor(scanner, doctorService));
                 a1.setAppointmentDate(inputDate(scanner, "Enter date in YYYY-MM-DD: "));
@@ -256,7 +266,13 @@ public class Main {
                 System.out.print("Enter notes: ");
                 a1.setNotes(scanner.nextLine());
 
-                appointmentService.updateAppointment(a1);  // Use service here
+                appointmentService.updateAppointment(a1);
+
+                if (!appointmentService.hasOtherAppointmentsBetween(originalDoctor.getDoctorId(), originalPatient.getPatientId())){
+                    doctorService.removePatientFromDoctor(originalDoctor.getDoctorId(), originalPatient);
+                    patientService.removeDoctorFromPatient(originalPatient.getPatientId(), originalDoctor);
+                }
+
                 System.out.println("Appointment updated successfully.");
                 break;
             case 4:
@@ -264,6 +280,12 @@ public class Main {
                 Appointment a2 = inputAppointment(scanner, appointmentService);
                 appointmentService.deleteAppointment(a2.getAppointmentId());
                 System.out.println("Appointment deleted successfully.");
+
+                if (!appointmentService.hasOtherAppointmentsBetween(
+                        a2.getDoctor().getDoctorId(), a2.getPatient().getPatientId())) {
+                    doctorService.removePatientFromDoctor(a2.getDoctor().getDoctorId(), a2.getPatient());
+                    patientService.removeDoctorFromPatient(a2.getPatient().getPatientId(), a2.getDoctor());
+                }
                 break;
             default:
                 System.out.println("Invalid choice.");
