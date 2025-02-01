@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @Table(name="Offices")
 public class Office {
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
-    int officeId;
+    private int officeId;
 
-    String location;
-    String phone;
+    private String location;
+    private String phone;
 
-    @OneToOne( cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "DoctorID")
-    Doctor doctor;
+    private Doctor doctor;
 }

@@ -2,17 +2,20 @@ package com.healthcaremanagement;
 
 import com.healthcaremanagement.model.Appointment;
 import com.healthcaremanagement.model.Doctor;
+import com.healthcaremanagement.model.Office;
 import com.healthcaremanagement.model.Patient;
 import com.healthcaremanagement.repository.AppointmentRepository;
 import com.healthcaremanagement.repository.DoctorRepository;
+import com.healthcaremanagement.repository.OfficeRepositoryImpl;
 import com.healthcaremanagement.repository.PatientRepository;
-import com.healthcaremanagement.service.AppointmentService;
-import com.healthcaremanagement.service.DoctorService;
-import com.healthcaremanagement.service.PatientService;
+import com.healthcaremanagement.service.*;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -28,19 +31,15 @@ public class Main {
         AppointmentRepository appointmentRepository = new AppointmentRepository(sessionFactory);
         AppointmentService appointmentService = new AppointmentService(appointmentRepository);
 
+        OfficeRepositoryImpl officeRepository = new OfficeRepositoryImpl(sessionFactory);
+        OfficeService officeService = new OfficeService(officeRepository);
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            String choice = "";
-            while (!choice.equals("4")) {
-                System.out.println("Enter your choice (1, 2, 3, or 4)");
-                System.out.println("1. Manage Patients");
-                System.out.println("2. Manage Doctors");
-                System.out.println("3. Manage Appointments");
-                System.out.println("4. End program");
 
-                choice = scanner.nextLine();
-
-                switch (choice) {
+        try( Scanner scanner = new Scanner(System.in)){
+            String input = "1";
+            while(!input.equals("5")){
+                input = printMainMenu(scanner);
+                switch (input) {
                     case "1":
                         managePatients(scanner, patientService);
                         break;
@@ -51,34 +50,25 @@ public class Main {
                         manageAppointments(scanner, appointmentService, patientService, doctorService);
                         break;
                     case "4":
+                        manageOffices(scanner, officeService, doctorService);
+                        break;
+                    case "5":
                         System.out.println("Bye");
                         break;
                     default:
                         System.out.println("Invalid choice. Try again.");
                 }
-
             }
         } finally {
             sessionFactory.close();
-
         }
     }
-
-
 
     private static void managePatients(Scanner scanner, PatientService patientService) {
 
 
-        System.out.println("1. Create Patient");
-        System.out.println("2. Read Patient");
-        System.out.println("3. Update Patient");
-        System.out.println("4. Delete Patient");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch (choice) {
-            case 1:
+        switch (getPatientChoice(scanner)) {
+            case "1":
                 // Application calls the service layer, not the repository directly
                 Patient newPatient = new Patient();
                 System.out.print("Enter first name: ");
@@ -91,13 +81,13 @@ public class Main {
 
                 System.out.print("Enter email: ");
                 newPatient.setEmail(scanner.nextLine());
-                System.out.print("Enter phone number: ");
-                newPatient.setPhoneNumber(scanner.nextLine());
+
+                newPatient.setPhoneNumber(inputPhoneNumber(scanner));
 
                 patientService.createPatient(newPatient);  // Use service here
                 System.out.println("Patient created successfully.");
                 break;
-            case 2:
+            case "2":
                 // Application calls the service layer, not the repository directly
 
                 Patient patient = inputPatient(scanner, patientService);
@@ -109,7 +99,7 @@ public class Main {
                 System.out.println("Phone: " + patient.getPhoneNumber());
 
                 break;
-            case 3:
+            case "3":
                 Patient updatePatient = inputPatient(scanner, patientService);
 
                 System.out.print("Enter new first name: ");
@@ -128,7 +118,7 @@ public class Main {
                 System.out.println("Patient updated successfully.");
 
                 break;
-            case 4:
+            case "4":
                 // Application calls the service layer, not the repository directly
                Patient deletePatient = inputPatient(scanner, patientService);
                 patientService.deletePatient(deletePatient.getPatientId());  // Use service here
@@ -167,7 +157,6 @@ public class Main {
                     System.out.println("Doctor created successfully.");
                     break;
                 case 2:
-                    // Application calls the service layer, not the repository directly
 
                     Doctor doctor = inputDoctor(scanner, doctorService);
 
@@ -292,6 +281,55 @@ public class Main {
         }
     }
 
+    private static void manageOffices(Scanner scanner, OfficeService officeService, DoctorService doctorService) {
+        switch(printOfficeMenu(scanner)){
+            case "1":
+                Office newOffice = new Office();
+                System.out.print("Enter location: ");
+                newOffice.setLocation(scanner.nextLine());
+
+                System.out.print("Enter phone: ");
+                newOffice.setPhone(scanner.nextLine());
+
+                newOffice.setDoctor(inputDoctor(scanner, doctorService));
+
+                officeService.createOffice(newOffice);
+                System.out.println("Office created successfully.");
+                break;
+            case "2":
+                printOffice(inputOffice(scanner, officeService));
+                break;
+            case "3":
+                Office o1 = inputOffice(scanner, officeService);
+
+                System.out.print("Enter location: ");
+                o1.setLocation(scanner.nextLine());
+                System.out.print("Enter phone number (###-###-####):  ");
+                o1.setPhone(scanner.nextLine());
+
+                o1.setDoctor(inputDoctor(scanner, doctorService));
+
+                officeService.createOffice(o1);
+                System.out.println("Office updated successfully.");
+
+                break;
+            case "4":
+                Office o2 = inputOffice(scanner, officeService);
+                officeService.deleteOffice(o2.getOfficeId());
+                System.out.println("Office deleted successfully.");
+                break;
+            case "5":
+                List<Office> offices = officeService.getAllOffices();
+                System.out.println("List of offices: ");
+
+                for(Office office1: offices){
+                    System.out.println("-------------");
+                    printOffice(office1);
+
+                }
+
+        }
+    }
     private static Doctor inputDoctor(Scanner scanner, DoctorService doctorService) {
         while(true){
             System.out.print("Enter doctor ID: ");
@@ -330,6 +368,23 @@ public class Main {
 
         }
     }
+    private static String inputPhoneNumber(Scanner scanner){
+        while(true){
+            System.out.print("Enter phone number (###-###-####): ");
+            String phone = scanner.nextLine();
+            if(isPhone(phone))
+                return phone;
+
+            System.out.println("Invalid phone number. Try again.");
+        }
+    }
+    private static Boolean isPhone(String phone){
+        Pattern pattern = Pattern.compile("^\\d{3}-\\d{3}-\\d{4}$");
+        Matcher matcher = pattern.matcher(phone);
+        return matcher.matches();
+
+
+    }
     private static Appointment inputAppointment(Scanner scanner, AppointmentService appointmentService){
         while(true){
             System.out.print("Enter Appointment ID: ");
@@ -343,6 +398,74 @@ public class Main {
         }
     }
 
+    private static Office inputOffice(Scanner scanner, OfficeService officeService) {
+        while(true){
+            System.out.print("Enter Office ID: ");
+            Office office = officeService.getOfficeById(scanner.nextInt());
+            scanner.nextLine();
+            if(office != null) {
+                return office;
+            }
+
+            System.out.println("Office not found. Try again.");
+        }
+    }
+    private static String printMainMenu(Scanner scanner) {
+        while (true) {
+            System.out.println("Enter your choice [1-5]");
+            System.out.println("1. Manage Patients");
+            System.out.println("2. Manage Doctors");
+            System.out.println("3. Manage Appointments");
+            System.out.println("4. Manage Offices");
+            System.out.println("5. End program");
+
+            String choice = scanner.nextLine();
+            if (choice.equals("1") || choice.equals("2") || choice.equals("3") || choice.equals("4") || choice.equals("5")) {
+                return choice;
+            }
+            System.out.println("Invalid choice. Try again.");
+        }
+    }
+    private static String getPatientChoice(Scanner scanner) {
+        while(true){
+            System.out.println("Select an option [1-4]: ");
+            System.out.println("1. Create Patient");
+            System.out.println("2. Read Patient");
+            System.out.println("3. Update Patient");
+            System.out.println("4. Delete Patient");
+
+            String choice = scanner.nextLine();
+            if(choice.equals("1") || choice.equals("2") || choice.equals("3") || choice.equals("4")) {
+                return choice;
+            }
+            System.out.println("Invalid choice. Try again.");
+        }
+
+    }
+
+    private static String printOfficeMenu(Scanner scanner){
+        while(true){
+            System.out.println("Select an option: [1-5]");
+            System.out.println("1. Create Office");
+            System.out.println("2. Read Office");
+            System.out.println("3. Update Office");
+            System.out.println("4. Delete Office");
+            System.out.println("5. List All Office");
+
+
+            String choice  = scanner.nextLine();
+            if(choice.equals("1") || choice.equals("2") || choice.equals("3") || choice.equals("4") || choice.equals("5")){
+                return choice;
+            }
+            System.out.println("Invalid choice. Please try again");
+        }
+    }
+    private static void printOffice(Office office){
+        System.out.println("Office ID: " + office.getOfficeId());
+        System.out.println("Office location: " + office.getLocation());
+        System.out.println("Phone number: " + office.getPhone());
+        System.out.println("Doctor ID: " + office.getDoctor().getDoctorId());
+    }
 }
 
 

@@ -9,8 +9,6 @@ import lombok.Data;
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
-
     private int appointmentId;
 
     @ManyToOne

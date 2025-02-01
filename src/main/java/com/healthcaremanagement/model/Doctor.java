@@ -13,6 +13,7 @@ import java.util.Set;
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="DoctorID")
     private int doctorId;
 
     @Column(name = "FirstName")
@@ -23,7 +24,7 @@ public class Doctor {
     private String specialty;
     private String email;
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Appointment> appointments = new HashSet<>();
 
     @OneToOne(mappedBy = "doctor", cascade = CascadeType.ALL)
@@ -31,7 +32,7 @@ public class Doctor {
 
     @ManyToMany(cascade = {CascadeType.PERSIST},fetch = FetchType.LAZY)
     @JoinTable(name = "Doctor_Patient",
-            joinColumns = @JoinColumn(name = "doctor_id"),
-            inverseJoinColumns = @JoinColumn(name = "patient_id"))
+            joinColumns = @JoinColumn(name = "DoctorID"),
+            inverseJoinColumns = @JoinColumn(name = "PatientID"))
     private List<Patient> patients;
 }

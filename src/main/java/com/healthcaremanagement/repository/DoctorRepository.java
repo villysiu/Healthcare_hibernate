@@ -27,7 +27,8 @@ public class DoctorRepository {
 
     public Doctor getDoctorById(int doctorId) {
         try (Session session = sessionFactory.openSession()) {
-            return  session.get(Doctor.class, doctorId);
+
+            return session.get(Doctor.class, doctorId);
         }
     }
 
